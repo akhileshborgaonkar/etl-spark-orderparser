@@ -1,12 +1,16 @@
 # order-parser
 Samsung coding challenge
 
-@Author : Akhilesh Borgaonkar 	
-@Email: Borgaonkar.akhilesh@gmail.com	
+@Author: Akhilesh Borgaonkar 	
+@Email: borgaonkar.akhilesh@gmail.com	
 @Contact: 2035701279
 
 Approach:
 My approach of solving this question is by scalable and faster way. The input file resides on HDFS and the rows in the file are read and mapped using spark application. The spark application is written in Java 8. My solution is a combination of spark and hive action which will help in larger scalability knowing that the order records files are very huge and painful to analyze by conventional programming methods.
+Pre-requisites:
+1.	Linux based machine with capability of handling at least One-node Hadoop cluster
+2.	Hadoop, Spark and Hive installed.
+3.	If willing to automate then, Oozie needs to be installed on the server.
 Workflow:
 1.	The jar for the spark application is generated and put on the Hadoop server along with the input files and update the file path in properties as required.
 2.	The application is run using spark-submit command through bash.
@@ -91,7 +95,8 @@ public void parse() {
 }
 
 Execution:
-1.	Update the input file path (file.path) and output hive table name (output.table) desired in the properties file at path src/main/resources/properties/ParserProperties.properties
+1.	Update the input file path (file.path) according to the location of input file and output hive table name (output.table) desired in the properties file located at path src/main/resources/properties/ParserProperties.properties
+
 2.	Use the spark-submit command as below to run the jar using bash:
 spark-submit \
         --class com.sample.spark.Parser \
@@ -108,14 +113,17 @@ spark-submit \
 3.	After the spark process is completed, run the hive query using beeline as below:
 
 Hive Query is as follows:
-set hive.cli.print.header=true;
 
+set hive.cli.print.header=true;
 select * from working.order_ab;
 
 Beeline command is as follows:
 
 	Hive -f output.sql > output.txt;
 
+
+Difference between two approaches:
+If the input file is stored on HDFS then update the properties file as mentioned below with path like “hdfs:///user/data/input.txt”. But, if you want to parse the input file which is local on the machine and not on the HDFS then update the properties file with path like “C://user/data/input.txt”. In order to parse a local input file, we can use basic file operations but I have kept the basic implementations same thinking about the scalability and speed. Hence, the deployment remains same.
 
 
 For more insights please find the project attached in the email compressed or clone from github at https://github.com/akhileshborgaonkar/order-parser.
