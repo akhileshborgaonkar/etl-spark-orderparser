@@ -34,7 +34,7 @@ public class ParserProperties extends HiveProperties{
 
     private void init() {
 
-        filePath = properties.getProperty("file.path","/tdx/aborgaonkar/sample/scripting_challenge_input_file.txt");
-        outputTable = properties.getProperty("output.table","working.order_ab");
+        filePath = properties.getProperty("file.path");
+        outputTable = properties.getProperty("output.table");
     }
 }

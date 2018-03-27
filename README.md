@@ -1,10 +1,14 @@
 # order-parser
 Samsung coding challenge
 
+@Author : Akhilesh Borgaonkar 	
+@Email: Borgaonkar.akhilesh@gmail.com	
+@Contact: 2035701279
+
 Approach:
-My approach of solving this question is by scalable way. The input file resides on HDFS and the rows in the file are read and mapped using spark application. The spark application is written in Java 8. My solution is a combination of spark and hive action which will help in larger scalability knowing that the order records files are very huge and painful to analyze by conventional programming methods.
+My approach of solving this question is by scalable and faster way. The input file resides on HDFS and the rows in the file are read and mapped using spark application. The spark application is written in Java 8. My solution is a combination of spark and hive action which will help in larger scalability knowing that the order records files are very huge and painful to analyze by conventional programming methods.
 Workflow:
-1.	The jar for the spark application is generated and put on the Hadoop server with the input files as a property to fetch.
+1.	The jar for the spark application is generated and put on the Hadoop server along with the input files and update the file path in properties as required.
 2.	The application is run using spark-submit command through bash.
 3.	The resultant rows are saved in hive table for better scalability.
 4.	The rows from hive table are then written to a text output file using beeline command.
@@ -87,7 +91,8 @@ public void parse() {
 }
 
 Execution:
-The spark-submit command is as below:
+1.	Update the input file path (file.path) and output hive table name (output.table) desired in the properties file at path src/main/resources/properties/ParserProperties.properties
+2.	Use the spark-submit command as below to run the jar using bash:
 spark-submit \
         --class com.sample.spark.Parser \
         --master yarn-client \
@@ -100,10 +105,17 @@ spark-submit \
         --driver-memory 4096M \
        sample-jwd.jar
 
-Hive action to write to file is as below:
+3.	After the spark process is completed, run the hive query using beeline as below:
 
+Hive Query is as follows:
 set hive.cli.print.header=true;
 
 select * from working.order_ab;
 
-For more insights please find the project attached in the email compressed.
+Beeline command is as follows:
+
+	Hive -f output.sql > output.txt;
+
+
+
+For more insights please find the project attached in the email compressed or clone from github at https://github.com/akhileshborgaonkar/order-parser.
