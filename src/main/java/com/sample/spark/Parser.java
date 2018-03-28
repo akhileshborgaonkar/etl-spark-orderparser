@@ -16,19 +16,25 @@ public class Parser {
     JavaSparkContext sc = new JavaSparkContext(conf);
     SQLContext sqc = new SQLContext(sc);
 
+    //Paths required to change as desired
+    String inputPath = "/tdx/aborgaonkar/sample/scripting_challenge_input_file.txt";
+    String outputPath = "/tdx/aborgaonkar/sample/output";
 
     public void parse() {
 
+        //Variables required to change the syntax of date
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat newformat = new SimpleDateFormat("yyyy-MM-dd");
 
-        JavaRDD<Order> orderJavaRDD = sc.textFile("/tdx/aborgaonkar/sample/scripting_challenge_input_file.txt")
-                .filter(r -> !r.contains("order_id:date"))
+        JavaRDD<Order> orderJavaRDD = sc.textFile(inputPath)
+                .filter(r -> !r.contains("order_id:date"))  //ignoring header in file
 
                 .map(r -> {
                     Order orderDbo = new Order();
                     String errorMsg = "";
+
                     try {
+
                         String[] f = r.split("\t");
 
                         if( StringUtils.isNotBlank(f[0])) {
@@ -84,12 +90,13 @@ public class Parser {
                     return orderDbo;
                 });
 
+        //Writing output rows to file on HDFS
         sqc.createDataFrame(orderJavaRDD, Order.class).write()
                 .format("com.databricks.spark.csv")
                 .option("header","true")
                 .option("delimiter","\t")
                 .mode(SaveMode.Overwrite)
-                .save("/tdx/aborgaonkar/sample/output.txt");
+                .save(outputPath);
 
     }
 
