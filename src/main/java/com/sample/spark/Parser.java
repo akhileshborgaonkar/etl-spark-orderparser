@@ -1,46 +1,28 @@
 package com.sample.spark;
 
-import com.sample.spark.properties.ParserProperties;
-import com.sample.spark.utils.SparkUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.hive.HiveContext;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Parser {
 
-    private ParserProperties prop;
-    private JavaSparkContext jsc;
-    private HiveContext hc;
-    private static Logger log = Logger.getLogger(Parser.class);
-
-    public Parser(ParserProperties prop) {
-
-        this.prop = prop;
-        jsc = SparkUtils.initSpark(prop);
-        hc = SparkUtils.getMetaStoreHiveContext(jsc, prop);
-    }
-
-    public Parser(JavaSparkContext jc, HiveContext hc, ParserProperties prop) {
-
-        this.jsc = jsc;
-        this.hc = hc;
-        this.prop = prop;
-    }
+    SparkConf conf = new SparkConf().setAppName("Sample-Spark").setMaster("local");
+    JavaSparkContext sc = new JavaSparkContext(conf);
+    SQLContext sqc = new SQLContext(sc);
 
 
     public void parse() {
-        hc.sql("use default");
+
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat newformat = new SimpleDateFormat("yyyy-MM-dd");
 
-        JavaRDD<Order> orderJavaRDD = jsc.textFile(prop.getFilePath())
+        JavaRDD<Order> orderJavaRDD = sc.textFile("/tdx/aborgaonkar/sample/scripting_challenge_input_file.txt")
                 .filter(r -> !r.contains("order_id:date"))
 
                 .map(r -> {
@@ -94,27 +76,26 @@ public class Parser {
                             orderDbo.setStartPageUrl("");
                         }
 
-                    } catch (Exception e) {
+                    } catch (ArrayIndexOutOfBoundsException e) {
                         errorMsg += "-Less Columns-";
-                        e.printStackTrace();
-
                         }
 
                     orderDbo.setErrorMsg(errorMsg);
                     return orderDbo;
                 });
 
-        hc.createDataFrame(orderJavaRDD, Order.class)
-                .write().mode(SaveMode.Overwrite).format("ORC")
-                .saveAsTable(prop.getOutputTable());
+        sqc.createDataFrame(orderJavaRDD, Order.class).write()
+                .format("com.databricks.spark.csv")
+                .option("header","true")
+                .option("delimiter","\t")
+                .mode(SaveMode.Overwrite)
+                .save("/tdx/aborgaonkar/sample/output.txt");
 
     }
 
     public static void main(String[] args) {
 
-        ParserProperties prop = ParserProperties.getInstance();
-
-        Parser orderParser = new Parser(prop);
+        Parser orderParser = new Parser();
         orderParser.parse();
     }
 }
