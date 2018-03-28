@@ -17,8 +17,8 @@ public class Parser {
     SQLContext sqc = new SQLContext(sc);
 
     //Paths required to change as desired
-    String inputPath = "/tdx/aborgaonkar/sample/scripting_challenge_input_file.txt";
-    String outputPath = "/tdx/aborgaonkar/sample/output";
+    String inputPath = "/user/aborgaonkar/sample/scripting_challenge_input_file.txt";
+    String outputPath = "/user/aborgaonkar/sample/output";
 
     public void parse() {
 

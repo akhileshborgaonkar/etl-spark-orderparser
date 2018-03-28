@@ -1,1 +1,6 @@
-/target
+target/
+*.iml
+.idea/
+.git/
+
+
